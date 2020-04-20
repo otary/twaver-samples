@@ -1,0 +1,186 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>拓扑</title>
+</head>
+<body>
+
+<script src="static/twaver/twaver.js"></script>
+<script src="static/twaver/license.js"></script>
+
+
+<script>
+    function init() {
+        /**
+         * 创建容器
+         */
+        var box = new twaver.ElementBox();
+
+        /**
+         * 创建画布
+         */
+        var network = new twaver.vector.Network(box);
+        document.body.appendChild(network.getView());
+        network.adjustBounds({x: 0, y: 0, width: 500, height: 500});
+
+        /*  const centerLocation = {x: 0, y: 0};
+          var node = new twaver.Node();
+          node.setClient("type", "layer");
+          node.setLocation(centerLocation);
+
+          node.setImage("none");
+          node.s("body.type", "vector");
+          node.s("vector.shape", "rectangle");
+          node.s("vector.fill.color", "#ffffff");
+
+          node.setLayerId("layer");
+          node.s("select.style", "none");
+          node.setSize(1000, 1000);
+          node.isAdjustedToBottom = function () {
+              return true;
+          };
+          box.add(node);*/
+
+
+        /**
+         * 添加tooltip样式
+         **/
+        network.getToolTip = function (element) {
+            var Id = element.getId();
+            var name = element.getName();
+            var icon = element.getIcon();
+            var clientProperty = element.getClient('clientProperty');
+            return 'Id:' + Id + '<br>' + 'name:' + name + '<br>' + 'icon:' + icon;
+        }
+
+
+        // const box = network.getElementBox();  // 获取box
+
+        // 文本颜色
+        twaver.Styles.setStyle('label.color', '#ec6c00');  // label（下）
+        twaver.Styles.setStyle('label2.color', '#57ab9a'); // label（上）
+        // 选中时的颜色
+        twaver.Styles.setStyle('select.color', 'green');
+
+        /**
+         * 创建节点
+         */
+        var node1 = new twaver.Node();
+        // 每个节点可以有2个label
+        node1.setName("TWaver");  // label（下）
+        node1.setName2("测试2");  // label(上)
+        node1.setLocation(100, 100);
+        // 节点宽度、高度
+        node1.setSize(100, 50);
+        node1.setStyle('icons.names', [["mono", "wheel", 'archive'], ["wheel", 'archive', 'mono'], ["archive", 'mono'], ["mono", 'wheel']]);
+
+
+        // 简洁写法
+        // var node1 = new twaver.Node({name: "TWaver", location: {x: 100, y: 100}});
+        // 将节点添加到容器中
+        box.add(node1);
+
+        var node2 = new twaver.Node();
+        node2.setName("HTML5");
+        node2.setLocation(300, 200);
+        box.add(node2);
+
+        /**
+         *  创建节点间的连接线
+         */
+        var link = new twaver.Link(node1, node2);
+        link.setName("Hello!");
+        link.setToolTip("<b>Hello!</b>");
+        // 存储自定义数据（类似HashMap）
+        link.setClient("clientProperty", {
+            a: "属性a",
+            b: "属性b",
+            c: "属性c"
+        });
+        // 将线添加到容器中
+        box.add(link);
+
+        /**
+         * 创建节点3
+         */
+        var node3 = new twaver.Node();
+        node3.setName("node3");
+        node3.setName2("node3-2");
+        node3.setStyle("label2.position", "bottomright");
+        node3.setStyle("label2.fill.color", "#fff");
+        node3.setStyle("label2.fill", "true");
+        node3.setStyle("label2.padding", 1);
+        node3.setStyle("label2.outline.color", "red");
+        node3.setStyle("label2.shadowable", true);
+        //node3.setStyle("label2.yoffset", 10);
+        node3.setLocation(400, 200);
+        box.add(node3);
+
+        /**
+         * 设置连线样式
+         * @type {Link}
+         */
+        var link2 = new twaver.Link(node1, node3);
+        link2.setStyle('arrow.to', true);
+        link2.setStyle('arrow.from.width', 30);
+        link2.setStyle('arrow.from.height', 20);
+        link2.setStyle('arrow.from.shape', 'arrow.slant');
+        box.add(link2);
+
+        /**
+         * 遍历节点
+         * @type {number}
+         */
+        let maxLocationX = 0;
+        let maxLocationY = 0;
+        box.forEach((element) => {
+            if (element instanceof twaver.Node) {
+                maxLocationX = Math.max(maxLocationX, element.getLocation().x);
+                maxLocationY = Math.max(maxLocationY, element.getLocation().y);
+            }
+        });
+
+        console.log(maxLocationX);
+        console.log(maxLocationY);
+
+
+       /* for (let i = 5; i < 50; i++) {
+            var _node = new twaver.Node();
+            _node.setName("node" + i);
+            box.add(_node);
+
+            var _link = new twaver.Link(node1, _node);
+            _link.setStyle('arrow.to', true);
+            _link.setStyle('arrow.from.width', 30);
+            _link.setStyle('arrow.from.height', 20);
+            _link.setStyle('arrow.from.shape', 'arrow.slant');
+            box.add(_link);
+        }*/
+
+
+        // 隐藏节点
+        // node3.setClient("hidden", true);
+        network.setVisibleFunction(function (element) {
+            if (element.getClient("hidden")) {
+                return false;
+            }
+            if (element.getParent() && element.getParent().getClient("hidden")) {
+                return false;
+            }
+            return true;
+        });
+
+        const autoLayouter = new twaver.layout.AutoLayouter(box);
+        autoLayouter.setRepulsion(3);
+        autoLayouter.doLayout('symmetry', () => {
+
+        });
+
+    }
+
+    init();
+</script>
+
+</body>
+</html>
